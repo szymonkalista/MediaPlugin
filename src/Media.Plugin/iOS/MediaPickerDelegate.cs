@@ -193,9 +193,13 @@ namespace Plugin.Media
 		{
 			if (viewController != null)
 			{
+				if (observer is null)
+					return;
+
 				UIDevice.CurrentDevice.EndGeneratingDeviceOrientationNotifications();
 				NSNotificationCenter.DefaultCenter.RemoveObserver(observer);
 				observer.Dispose();
+				observer = null;
 			}
 		}
 
