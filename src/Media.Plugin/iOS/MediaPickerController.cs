@@ -14,9 +14,13 @@ namespace Plugin.Media
     /// </summary>
     public sealed class MediaPickerController : UIImagePickerController
     {
+        TaskCompletionSource<Task> taskCompletionSource;
 
-        internal MediaPickerController(MediaPickerDelegate mpDelegate) =>
+        internal MediaPickerController(MediaPickerDelegate mpDelegate, TaskCompletionSource<Task> taskCompletionSource)
+        { 
 			base.Delegate = mpDelegate;
+            this.taskCompletionSource = taskCompletionSource;
+	    }
         
 
         /// <summary>
@@ -34,12 +38,18 @@ namespace Plugin.Media
             }
         }
 
-		/// <summary>
-		/// Gets result of picker
-		/// </summary>
-		/// <returns></returns>
+        public override void ViewDidDisappear(bool animated)
+        { 
+	        base.ViewDidDisappear(animated);
+            this.taskCompletionSource.TrySetResult(null);
+	    }
 
-		public Task<List<MediaFile>> GetResultAsync() =>
+        /// <summary>
+        /// Gets result of picker
+        /// </summary>
+        /// <returns></returns>
+
+        public Task<List<MediaFile>> GetResultAsync() =>
             ((MediaPickerDelegate)Delegate).Task;
 
         bool disposed;

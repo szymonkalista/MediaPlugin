@@ -236,9 +236,9 @@ namespace Plugin.Media
 				throw new ArgumentException("options.Camera is not a member of CameraDevice");
 		}
 
-		static MediaPickerController SetupController(MediaPickerDelegate mpDelegate, UIImagePickerControllerSourceType sourceType, string mediaType, StoreCameraMediaOptions options = null)
+		static MediaPickerController SetupController(MediaPickerDelegate mpDelegate, UIImagePickerControllerSourceType sourceType, string mediaType, TaskCompletionSource<Task> taskCompletionSource, StoreCameraMediaOptions options = null)
 		{
-			var picker = new MediaPickerController(mpDelegate);
+			var picker = new MediaPickerController(mpDelegate, taskCompletionSource);
 			picker.MediaTypes = new[] { mediaType };
 			picker.SourceType = sourceType;
 
@@ -285,7 +285,11 @@ namespace Plugin.Media
 			if (od != null)
 				throw new InvalidOperationException("Only one operation can be active at a time");
 
-			var picker = SetupController(ndelegate, sourceType, mediaType, options);
+			var tcs = new TaskCompletionSource<Task>();
+
+			var picker = SetupController(ndelegate, sourceType, mediaType, tcs, options);
+
+			tcs.Task.ContinueWith(t => Dismiss(popover, picker));
 
 			if (UIDevice.CurrentDevice.UserInterfaceIdiom == UIUserInterfaceIdiom.Pad && sourceType == UIImagePickerControllerSourceType.PhotoLibrary)
 			{
@@ -327,12 +331,7 @@ namespace Plugin.Media
 				});
 			}
 
-			return ndelegate.Task.ContinueWith(t =>
-			{
-				Dismiss(popover, picker);
-
-				return t.Result == null ? null : t.Result.FirstOrDefault();
-			});
+			return ndelegate.Task.ContinueWith(t => t.Result == null ? null : t.Result.FirstOrDefault());
 		}
 
 		Task<List<MediaFile>> GetMediasAsync(UIImagePickerControllerSourceType sourceType, string mediaType, StoreCameraMediaOptions options = null, MultiPickerOptions pickerOptions = null, CancellationToken token = default(CancellationToken))

@@ -162,7 +162,7 @@
       <Name>Media.Plugin</Name>
     </ProjectReference>
     <ProjectReference Include="..\Media.Plugin.Sample\Media.Plugin.Sample.csproj">
-      <Project>{B9EEC491-CF4E-4F53-BF9B-EF6EDF6ADFE5}</Project>
+      <Project>{16F4EBCE-FB1A-4A06-BB5B-2876E8C2CD7A}</Project>
       <Name>Media.Plugin.Sample</Name>
     </ProjectReference>
   </ItemGroup>
